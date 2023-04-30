@@ -1,13 +1,9 @@
-import Head from 'next/head'
-import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
-import Link from 'next/link';
-import { Button } from 'react-bootstrap';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import router from 'next/router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { collection, addDoc, setDoc, doc, getDoc } from "firebase/firestore";
+import { collection, setDoc, doc, getDoc } from "firebase/firestore";
 import { db } from '../lib/firebase';
 
 let intervalId: ReturnType<typeof setInterval>;
@@ -43,8 +39,12 @@ export default function Game() {
         }
     }, [userId])
 
+    //-------------------------------------------------------------------------------------------------------------
+    //
+    //                                     I N I T I A L I Z E     W O R D
+    //
+    //-------------------------------------------------------------------------------------------------------------
     async function chooseWord() {
-        // debugger;
         try {
             const wordsDocRef = doc(db, "words", "5-letter");
             const docSnap = await getDoc(wordsDocRef);
@@ -78,33 +78,23 @@ export default function Game() {
                     const wordNum = Math.trunc(Math.random() * docSnap.data().words.length);
                     setAnswer(docSnap.data().words[wordNum].toUpperCase());
                 }
-
-                // console.log("Document data:", docSnap.data().words[4]);
             } else {
-                // docSnap.data() will be undefined in this case
-                setAnswer('CHARM')
-                console.log("No such document!");
+                setAnswer('CHARM');
             }
-            console.log(answer);
         } catch (e) {
-            // try {
-            //     const otherDoc = await setDoc(doc(collection(db, "stats"), "1"), {
-            //         filler: true
-            //     });
-            //     chooseWord();
-            // } catch (e) {
-            //     console.log(`error ${e}`);
-
-            // }
-            console.log(`error ${e}`);
+            console.log(e);
         }
     }
 
+    //-------------------------------------------------------------------------------------------------------------
+    //
+    //                                     S A V E     S T A T S
+    //
+    //-------------------------------------------------------------------------------------------------------------
     async function saveStats(win: boolean) {
-        // process.env.MAPS_API_KEY
-        console.log("saving stats")
         let lat = 0;
         let lon = 0;
+
         navigator.geolocation.getCurrentPosition((location) => {
             lat = location.coords.latitude;
             lon = location.coords.longitude;
@@ -114,6 +104,7 @@ export default function Game() {
         }, {
             enableHighAccuracy: true,
         })
+
         try {
             const statDocRef = doc(db, "stats", userId);
             const docSnap = await getDoc(statDocRef);
@@ -145,8 +136,6 @@ export default function Game() {
                     locations: [...newLocations]
                 });
             } else {
-                // docSnap.data() will be undefined in this case
-                // console.log("No such document!");
                 let guessDist: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, };
                 if (win) guessDist[guessNumber - 1] = 1;
 
@@ -168,11 +157,8 @@ export default function Game() {
                 });
             }
         } catch (e) {
-            console.error("Error adding document: ", e);
+            console.error(e);
         }
-
-
-
     }
 
     //-------------------------------------------------------------------------------------------------------------
@@ -181,9 +167,6 @@ export default function Game() {
     //
     //-------------------------------------------------------------------------------------------------------------
     useEffect(() => {
-        // setAnswer('SKANK')
-
-
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (!user) {
                 // If the user is not signed in, redirect to the login page
@@ -196,7 +179,6 @@ export default function Game() {
             }
         });
 
-
         document.addEventListener('keyup', handleKeyUp);
 
         // Clean up function to remove the event listener when component unmounts
@@ -207,7 +189,6 @@ export default function Game() {
             unsubscribe();
         };
     }, []);
-
 
     useEffect(() => {
         if (keyPressed === '' || gameOver) return;
@@ -229,13 +210,16 @@ export default function Game() {
         if (guessNumber <= 1) return;
 
         let correctLettersUpdated = "";
+
         for (let i = 0; i < guesses[guessNumber - 1].length; i++) {
             correctLettersUpdated += checkLetter(guesses[guessNumber - 1][i], i, guessNumber - 1);
             console.log(correctLetters)
         }
+
         let updatedCorrectLetters = { ...correctLetters };
         updatedCorrectLetters[guessNumber - 1] = correctLettersUpdated;
         setCorrectLetters(updatedCorrectLetters);
+
         if (correctLettersUpdated === "*****") {
             setMessage(messageElement("win"));
             document.removeEventListener('keyup', handleKeyUp);
@@ -252,17 +236,15 @@ export default function Game() {
                 saveStats(false);
             }
         }
-        console.log(correctLetters)
     }, [guessNumber])
 
     function updateGuesses(key: string) {
         let letters = /^[A-Z,a-z]{1}$/;
 
         if (keyPressed.match(letters)) {
+            // start timer
             if (!playing) {
                 setMyInterval(() => {
-                    // const 
-                    console.log("second")
                     setTime(time => time + 1);
                 }, 1000);
                 setPlaying(true);
@@ -277,7 +259,6 @@ export default function Game() {
                 return updatedGuesses;
             });
         } else if (keyPressed === "Backspace") {
-            console.log('backspace')
             setGuesses(guesses => {
                 let updatedGuesses = { ...guesses };
                 updatedGuesses[guessNumber] = updatedGuesses[guessNumber].substring(0, updatedGuesses[guessNumber].length - 1);
@@ -285,71 +266,15 @@ export default function Game() {
                 return updatedGuesses;
             });
         } else if (keyPressed === "Enter") {
-            console.log("space");
-            setNextGuess(nextGuess => true);
+            setNextGuess(true);
         }
     }
 
     async function handleKeyUp(event: KeyboardEvent) {
         setKeyPressed(event.key);
-        // try {
-        //     // const docRef = await addDoc(collection(db, "users"), {
-        //     //     user: userId,
-        //     //     first: "Ada",
-        //     //     last: "Lovelace",
-        //     //     born: 1815
-        //     // });
-        //     // console.log("Document written with ID: ", docRef.id);
-        //     // const otherDoc = await setDoc(doc(collection(db, "cities"), "SF"), {
-        //     //     name: "San Francisco", state: "CA", country: "USA",
-        //     //     capital: false, population: 860000,
-        //     //     regions: ["west_coast", "norcal"]
-        //     // });
-        //     // const cityDocRef = doc(db, "cities", "SF");
-        //     // const docSnap = await getDoc(cityDocRef);
-
-        //     // if (docSnap.exists()) {
-        //     //     console.log("Document data:", docSnap.data());
-        //     // } else {
-        //     //     // docSnap.data() will be undefined in this case
-        //     //     console.log("No such document!");
-        //     // }
-        //     // const wordDoc = await setDoc(doc(collection(db, "words"), "words"), {
-        //     //     words: ["west_coast", "norcal", ";aslkdfj;as", "aslkdfj;a"]
-        //     // });
-        //     // const wordDocRef = doc(db, "words", "words");
-        //     // const wordDocSnap = await getDoc(wordDocRef);
-
-        //     // if (wordDocSnap.exists()) {
-        //     //     console.log("Document data:", wordDocSnap.data().words[1]);
-        //     // } else {
-        //     //     // docSnap.data() will be undefined in this case
-        //     //     console.log("No such document!");
-        //     // }
-
-
-
-        //     // const otherDoc = await setDoc(doc(collection(db, "words"), "5-letter"), {
-        //     //     words: words
-        //     // });
-        //     const wordsDocRef = doc(db, "words", "5-letter");
-        //     const docSnap = await getDoc(wordsDocRef);
-
-        //     if (docSnap.exists()) {
-        //         console.log("Document data:", docSnap.data().words[4]);
-        //     } else {
-        //         // docSnap.data() will be undefined in this case
-        //         console.log("No such document!");
-        //     }
-        // } catch (e) {
-        //     console.error("Error adding document: ", e);
-        // }
     };
 
-
     function checkLetter(letter: string, position: number, guess: number) {
-        // if (guess <= guessNumber) return;
-        console.log("position" + position)
         let answerOccurances = 0;
         let guessOccurances = 0;
         for (let i = 0; i < answer.length; i++) {
@@ -360,8 +285,6 @@ export default function Game() {
                 answerOccurances--;
             }
         }
-        console.log(answerOccurances)
-        console.log(guessOccurances)
 
         if (answer[position] === letter) {
             return "*";
@@ -380,24 +303,6 @@ export default function Game() {
                         <h2 className='winMessage text-center text-wrap'>{answer}</h2>
                         <h3 className='text-center'>{guessNumber - 1} guess{guessNumber - 1 === 1 ? '' : 'es'}</h3>
                         <h3 className='text-center'>{time >= 60 ? `${Math.trunc(time / 60)} min ${time % 60}` : time} sec</h3>
-                        {/* <h2 className='text-center mt-3'>Stats</h2>
-
-                        <div className='col col-6'>
-                            <h3>Solve time</h3>
-                            <p>{time} seconds</p>
-                        </div>
-                        <div className='col col-6'>
-                            <h3>Streak</h3>
-                            <p>as;jdfl</p>
-                        </div>
-                        <div className='col col-6'>
-                            <h3>Total games played</h3>
-                            <p>;alkdfj;lakj</p>
-                        </div>
-                        <div className='col col-6'>
-                            <h3>Win percentage</h3>
-                            <p>alsdfj;a</p>
-                        </div> */}
                         <button aria-selected='true' className='btn btn-primary mt-3 w-50' onClick={() => router.push('/stats')}>See more stats</button>
                     </div>
                 </>
@@ -425,7 +330,6 @@ export default function Game() {
     const row = (row: number) => (
         <>
             <div className="row justify-content-between">
-                {/* <div className={`d-flex p-3 rounded m-1 col-2 text-white d-flex justify-content-center ${answer.includes(guesses[1][0]) && guessNumber > 1 ? 'bg-warning' : 'bg-dark'}`}> */}
                 <div className={`d-flex p-3 rounded m-1 col-2 text-white d-flex justify-content-center letter-box ${correctLetters[row][0] === '*' ? 'bg-success' : correctLetters[row][0] === '!' ? 'bg-warning' : 'bg-dark'}`}>
                     <div className="align-items-center text-center letter">{guesses[row][0]}</div>
                 </div>

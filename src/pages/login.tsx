@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { auth } from "../lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
@@ -14,17 +14,18 @@ const LoginScreen = () => {
     const [password, setPassword] = useState('');
 
     function signUp() {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then(({ user }) => {
-                console.log(user);
-            })
-        const next = router.query.next as typeof router.asPath || "/" as typeof router.asPath;
-        router.push(next);
+        try {
+            createUserWithEmailAndPassword(auth, email, password);
+            const next = router.query.next as typeof router.asPath || "/" as typeof router.asPath;
+            router.push(next);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-
     function login() {
-        signInWithEmailAndPassword(auth, email, password)
+        try {
+            signInWithEmailAndPassword(auth, email, password)
             .then(({ user }) => {
                 console.log(user)
             })
@@ -34,34 +35,68 @@ const LoginScreen = () => {
                     pathname: next,
                 });
             })
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    useEffect(() => {
-        console.log(typeof router.query.next)
-    }, [])
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+    };
 
     return (
-        <div className="container">
-            <div className="login">
-                <div>Login / Create Account</div>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
-                <div className="login-controls">
-                    <button className="secondary" onClick={signUp}>Create Account</button>
-                    <button onClick={login}>Sign In</button>
+        <>
+            <div className="container">
+                <div className="row justify-content-center mt-5">
+                    <div className="col-md-6">
+                        <Form onSubmit={handleSubmit}>
+                            <h2 className='mb-3'>Login / Create Account</h2>
+                            <Form.Group controlId="formEmail" className='mb-2'>
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    name="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    placeholder="Enter email"
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group controlId="formPassword" className='mb-5'>
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control
+                                    type="password"
+                                    name="password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    placeholder="Password"
+                                    required
+                                />
+                            </Form.Group>
+                            <div className='row justify-content-around'>
+                                <div className='col'>
+                                    <Button variant="primary" type="button" onClick={login}>
+                                        Sign in
+                                    </Button>
+                                </div>
+                                <div className='col text-end'>
+                                    <Button variant="primary" type="button" onClick={signUp}>
+                                        Sign up
+                                    </Button>
+                                </div>
+                            </div>
+                        </Form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     )
     const [formData, setFormData] = useState<LoginFormData>({
         email: '',
         password: '',
     });
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        console.log(formData);
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((prevFormData) => ({

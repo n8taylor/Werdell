@@ -11,23 +11,12 @@ const authorization = getAuth();
 
 export default function App({ Component, pageProps }: AppProps) {
   const [currentPage, setCurrentPage] = useState("");
-  // useEffect(() => {
-  //   import("bootstrap/dist/js/bootstrap");
-  // }, [])
   const [signedIn, setSignedIn] = useState(false);
 
-
   useEffect(() => {
-
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         setSignedIn(false);
-        // If the user is not signed in, redirect to the login page
-        // router.replace({
-        //   pathname: "/login",
-        //   query: { next: router.asPath },
-        // });
       } else {
         setSignedIn(true);
       }
@@ -37,11 +26,10 @@ export default function App({ Component, pageProps }: AppProps) {
   }, []);
 
   function logoutUser() {
-
     signOut(authorization).then(() => {
       // Sign-out successful.
     }).catch((error) => {
-      // An error happened.
+      console.log(error);
     });
   }
 
@@ -66,12 +54,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <>
-      {/* <nav>
-        <a href='/'>home</a>
-        <a href='/game'>game</a>
-      </nav> */}
       <nav className="px-3 navbar navbar-expand-lg navbar-light bg-light">
-        {/* <a className="navbar-brand" href="#">Skwordle</a> */}
         <a className="navbar-brand" href="#">Werdell</a>
         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
@@ -87,19 +70,9 @@ export default function App({ Component, pageProps }: AppProps) {
             <li className="nav-item">
               <Link className="nav-link" href="/stats">Stats</Link>
             </li>
-            {/* <li className="nav-item">
-              <a className="nav-link disabled" href="#">Disabled</a>
-            </li> */}
           </ul>
           <ul className='navbar-nav'>
             {signedIn ? signOutOption : signInOptions}
-
-            {/* <li className="nav-item">
-              <Link className="nav-link" href="/signup">Sign Up</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" href="/login">Sign In</Link>
-            </li> */}
           </ul>
         </div>
       </nav>

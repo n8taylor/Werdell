@@ -4,8 +4,6 @@ import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import router from 'next/router';
 import { DocumentData, doc, getDoc } from 'firebase/firestore';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
-import { Loader } from "@googlemaps/js-api-loader"
 
 
 export default function Stats() {
@@ -15,43 +13,29 @@ export default function Stats() {
 
   useEffect(() => {
     if (userId !== "") {
-      console.log(userId)
       getStats();
     }
   }, [userId])
 
   async function getStats() {
-    // debugger;
     try {
       const statDocRef = doc(db, "stats", userId);
       const statsDocSnap = await getDoc(statDocRef);
 
-
       if (statsDocSnap.exists()) {
         setStats(statsDocSnap.data());
-      } else {
-        console.log("no stats")
       }
     } catch (e) {
-      // try {
-      //     const otherDoc = await setDoc(doc(collection(db, "stats"), "1"), {
-      //         filler: true
-      //     });
-      //     chooseWord();
-      // } catch (e) {
-      //     console.log(`error ${e}`);
-
-      // }
-      console.log(`error ${e}`);
+      console.log(e);
     }
   }
 
   useEffect(() => {
     if (!stats) return;
 
+    // calculate the average location
     let latSum = 0;
     let lonSum = 0;
-
 
     for (const location of stats.locations) {
       latSum += location.lat;
@@ -61,19 +45,19 @@ export default function Stats() {
     const avgLat = latSum / stats.locations.length;
     const avgLon = lonSum / stats.locations.length;
 
+    // calculate the farthest location from the average
     let farthestLat = 0;
     let farthestLon = 0;
+
     for (const location of stats.locations) {
       if (Math.abs(avgLat - location.lat) > farthestLat) farthestLat = Math.abs(avgLat - location.lat);
       if (Math.abs(avgLat - location.lon) > farthestLon) farthestLon = Math.abs(avgLon - location.lon);
     }
 
-    console.log(farthestLat)
-    console.log(farthestLon)
+    // adjust the zoom of the map according to the farthest location
     let digits = 8;
     if (farthestLat > farthestLon) {
       while (farthestLat > 1) {
-        console.log(farthestLat)
         digits--;
         farthestLat /= 2;
       }
@@ -84,11 +68,6 @@ export default function Stats() {
       }
     }
 
-    // const zoom = farthestLat > farthestLon ? farthestLat / 
-
-    console.log(process.env.MAPS_API_KEY)
-    // const latitudes = [41, 42];
-    // const longitudes = [-111, -110];
     const apiKey = "AIzaSyBEDjeeW8Z88ENTkaORfiUqm35ZzkKzURM";
     const center = `${avgLat},${avgLon}`;
     const zoom = digits;
@@ -99,37 +78,13 @@ export default function Stats() {
       .map((location: { [key: string]: number }, index: number) => `color:red|${location.lat},${location.lon}`)
       .join('&markers=');
 
-    console.log(markers)
-
     // Build the URL for the static map image
     const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${center}&zoom=${zoom}&size=${size}&markers=${markers}&key=${apiKey}`;
 
     setMapUrl(mapUrl);
-
-
-
-    // // Load the Google Maps JavaScript API
-    // const script = document.createElement("script");
-    // script.src = `https://maps.googleapis.com/maps/api/js?key=${"AIzaSyBEDjeeW8Z88ENTkaORfiUqm35ZzkKzURM"}`;
-    // // script.async = true;
-    // document.body.appendChild(script);
-
-    // // Define the initMap function
-    // script.onload = () => {
-    //   const map = new window.google.maps.Map(document.getElementById("map")!, {
-    //     center: {
-    //       lat: 37.7749,
-    //       lng: -122.4194
-    //     },
-    //     zoom: 8
-    //   });
-    // }
   }, [stats])
 
   useEffect(() => {
-    // setAnswer('SKANK')
-
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         // If the user is not signed in, redirect to the login page
@@ -142,18 +97,10 @@ export default function Stats() {
       }
     });
 
-
-
-    // Clean up function to remove the event listener when component unmounts
     return () => {
-      console.log("clearing interval")
       unsubscribe();
     };
   }, []);
-
-  // useEffect(() => {
-
-  // }, []);
 
   return (
     <div className='d-flex justify-content-end'>
@@ -300,11 +247,9 @@ export default function Stats() {
             <h3></h3>
           </div>
           <div className='col-6'>
-
           </div>
         </div>
       </div>
-
     </div>
   );
 };
