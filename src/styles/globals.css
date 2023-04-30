@@ -1,4 +1,95 @@
-:root {
+.werdell-grid {
+  min-width: 300px;
+}
+
+.letter {
+  min-height: 25px;
+  min-width: 25px;
+  font-weight: 600;
+}
+
+.letter-box {
+  box-shadow:
+    0px 2px 10px rgba(0, 0, 0, 0.2),
+    0px 10px 20px rgba(0, 0, 0, 0.3),
+    0px 30px 60px 1px rgba(0, 0, 0, 0.5);
+}
+
+button {
+  box-shadow:
+    0px 2px 10px rgba(0, 0, 0, 0.2),
+    0px 10px 20px rgba(0, 0, 0, 0.3),
+    0px 30px 60px 1px rgba(0, 0, 0, 0.5);
+}
+
+.win-message {
+  color: white;
+  background: #136a8a;
+  background:
+    -webkit-linear-gradient(to right, #eeb307, #198553);
+  background:
+    linear-gradient(to right, #eeb307, #198553);
+  margin: auto;
+  box-shadow:
+    0px 2px 10px rgba(0, 0, 0, 0.2),
+    0px 10px 20px rgba(0, 0, 0, 0.3),
+    0px 30px 60px 1px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 50px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 400px;
+}
+
+.lose-message {
+  color: white;
+  background: #136a8a;
+  background:
+    -webkit-linear-gradient(to right, #eeb307, #dc3545);
+  background:
+    linear-gradient(to right, #eeb307, #dc3545);
+  margin: auto;
+  box-shadow:
+    0px 2px 10px rgba(0, 0, 0, 0.2),
+    0px 10px 20px rgba(0, 0, 0, 0.3),
+    0px 30px 60px 1px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 50px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 400px;
+}
+
+.timer {
+  z-index: -1;
+  font-size: 30em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.display-1 {
+  font-size: 5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.btn-lg {
+  font-size: 1.5rem;
+  padding: 0.75rem 2rem;
+}
+
+/* .map {
+  height:500px;
+  width: 500px;
+} */
+
+/* :root {
   --max-width: 1100px;
   --border-radius: 12px;
   --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
@@ -104,4 +195,4 @@ a {
   html {
     color-scheme: dark;
   }
-}
+} */
